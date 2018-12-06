@@ -12,11 +12,7 @@ module.exports = {
   },
   plugins: [new webpack.HotModuleReplacementPlugin()],
   entry: {
-    index: [
-      '@babel/polyfill',
-      // 'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000&reload=true',
-      './src/control-panel.js'
-    ]
+    cpanel: ['./src/control-panel.js']
   },
   mode: 'development',
   output: {
@@ -27,17 +23,17 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.jsx']
   },
-  optimization: {
-    noEmitOnErrors: true,
-    splitChunks: {
-      cacheGroups: {
-        commons: {
-          name: 'vendor',
-          chunks: 'all'
-        }
-      }
-    }
-  },
+  // optimization: {
+  //   noEmitOnErrors: true,
+  //   splitChunks: {
+  //     cacheGroups: {
+  //       commons: {
+  //         name: 'vendor',
+  //         chunks: 'all'
+  //       }
+  //     }
+  //   }
+  // },
   devServer: { inline: true },
   devtool: 'source-map'
 };
