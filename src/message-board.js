@@ -1,4 +1,6 @@
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware } from 'redux';
+import { get } from './http';
+import { createLogger } from 'redux-logger';
 
 export const ONLINE = `ONLINE`;
 export const AWAY = `AWAY`;
@@ -7,6 +9,10 @@ export const OFFLINE = `OFFLINE`;
 
 export const UPDATE_STATUS = `UPDATE_STATUS`;
 export const CREATE_NEW_MESSAGE = `CREATE_NEW_MESSAGE`;
+
+export const READY = `READY`;
+export const WAITING = `WAITING`;
+export const NEW_MESSAGE_SERVER_ACCEPTED = `NEW_MESSAGE_SERVER_ACCEPTED`;
 
 const defaultState = {
   messages: [
@@ -51,7 +57,7 @@ const combinedReducer = combineReducers({
   userStatus: userStatusReducer,
   messages: messageReducer
 });
-const store = createStore(combinedReducer);
+const store = createStore(combinedReducer, applyMiddleware(createLogger()));
 
 const render = () => {
   const { messages, userStatus } = store.getState();
@@ -91,3 +97,8 @@ document.forms.newMessage.addEventListener('submit', e => {
 
 render();
 store.subscribe(render);
+
+console.log('Making request...');
+get(`http://pluralsight.com`, id => {
+  console.log('Receive callback', id);
+});
