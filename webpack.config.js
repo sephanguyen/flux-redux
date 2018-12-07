@@ -13,7 +13,8 @@ module.exports = {
   plugins: [new webpack.HotModuleReplacementPlugin()],
   entry: {
     cpanel: ['./src/control-panel.js'],
-    tasks: ['./src/tasks.js']
+    tasks: ['./src/tasks.js'],
+    'message-board': ['./src/message-board.js']
   },
   mode: 'development',
   output: {
