@@ -6,6 +6,7 @@ export const BUSY = `BUSY`;
 export const OFFLINE = `OFFLINE`;
 
 export const UPDATE_STATUS = `UPDATE_STATUS`;
+export const CREATE_NEW_MESSAGE = `CREATE_NEW_MESSAGE`;
 
 const defaultState = {
   messages: [
@@ -23,7 +24,10 @@ const defaultState = {
   userStatus: ONLINE
 };
 
-const reducer = (state = defaultState, { type, value }) => {
+const userStatusReducer = (
+  state = defaultState.userStatus,
+  { type, value }
+) => {
   switch (type) {
     case UPDATE_STATUS:
       return { ...state, userStatus: value };
@@ -31,7 +35,23 @@ const reducer = (state = defaultState, { type, value }) => {
   return state;
 };
 
-const store = createStore(reducer);
+const messageReducer = (
+  state = defaultState.messages,
+  { type, value, postedBy, date }
+) => {
+  switch (type) {
+    case CREATE_NEW_MESSAGE:
+      const newState = [{ date, postedBy, content: value }, ...state];
+      return newState;
+  }
+  return state;
+};
+
+const combinedReducer = combineReducers({
+  userStatus: userStatusReducer,
+  messages: messageReducer
+});
+const store = createStore(combinedReducer);
 
 const render = () => {
   const { messages, userStatus } = store.getState();
@@ -41,6 +61,7 @@ const render = () => {
     .join('');
 
   document.forms.newMessage.fields.disabled = userStatus === OFFLINE;
+  document.forms.newMessage.value = '';
 };
 
 const statusUpdateAction = value => {
@@ -50,8 +71,22 @@ const statusUpdateAction = value => {
   };
 };
 
+const newMessageAction = (content, postedBy) => {
+  const date = new Date();
+  return { type: CREATE_NEW_MESSAGE, value: content, postedBy, date };
+};
+
 document.forms.selectStatus.status.addEventListener('change', e => {
   store.dispatch(statusUpdateAction(e.target.value));
+});
+
+document.forms.newMessage.addEventListener('submit', e => {
+  e.preventDefault();
+  const value = e.target.newMessage.value;
+  const userName = localStorage[`preferences`]
+    ? JSON.parse(localStorage[`preferences`]).userName
+    : 'Jim';
+  store.dispatch(newMessageAction(value, userName));
 });
 
 render();
