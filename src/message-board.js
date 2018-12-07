@@ -27,7 +27,8 @@ const defaultState = {
       content: `I dont know if the new feature....`
     }
   ],
-  userStatus: ONLINE
+  userStatus: ONLINE,
+  apiCommunicationStatus: READY
 };
 
 const userStatusReducer = (
@@ -53,20 +54,32 @@ const messageReducer = (
   return state;
 };
 
+const apiCommunicationStatusReducer = (state = READY, { type }) => {
+  switch (type) {
+    case CREATE_NEW_MESSAGE:
+      return WAITING;
+    case NEW_MESSAGE_SERVER_ACCEPTED:
+      return READY;
+  }
+  return state;
+};
+
 const combinedReducer = combineReducers({
   userStatus: userStatusReducer,
-  messages: messageReducer
+  messages: messageReducer,
+  apiCommunicationStatus: apiCommunicationStatusReducer
 });
 const store = createStore(combinedReducer, applyMiddleware(createLogger()));
 
 const render = () => {
-  const { messages, userStatus } = store.getState();
+  const { messages, userStatus, apiCommunicationStatus } = store.getState();
   document.getElementById('messages').innerHTML = messages
     .sort((a, b) => b.date - a.date)
     .map(message => `<div>${message.postedBy} : ${message.content}</div>`)
     .join('');
 
-  document.forms.newMessage.fields.disabled = userStatus === OFFLINE;
+  document.forms.newMessage.fields.disabled =
+    userStatus === OFFLINE || apiCommunicationStatus === WAITING;
   document.forms.newMessage.value = '';
 };
 
@@ -79,6 +92,10 @@ const statusUpdateAction = value => {
 
 const newMessageAction = (content, postedBy) => {
   const date = new Date();
+
+  get(`/api/create`, id => {
+    store.dispatch({ type: NEW_MESSAGE_SERVER_ACCEPTED });
+  });
   return { type: CREATE_NEW_MESSAGE, value: content, postedBy, date };
 };
 
